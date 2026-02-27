@@ -1,0 +1,169 @@
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local selectedPlayerName = "NONE"
+
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "FearedSpammerUI"
+ScreenGui.ResetOnSpawn = false
+
+-- --- MAIN PANEL ---
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 160, 0, 260) -- Slightly wider for better text fit
+MainFrame.Position = UDim2.new(1, -170, 0, 10) 
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BorderSizePixel = 0
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+
+-- --- WHITE CIRCLE MINIMIZE ---
+local MiniBtn = Instance.new("TextButton", MainFrame)
+MiniBtn.Size = UDim2.new(0, 14, 0, 14)
+MiniBtn.Position = UDim2.new(1, -22, 0, 8)
+MiniBtn.BackgroundColor3 = Color3.new(1, 1, 1)
+MiniBtn.Text = ""
+Instance.new("UICorner", MiniBtn).CornerRadius = UDim.new(1, 0)
+
+-- --- MINI MODE BUTTONS ---
+local MiniSpam = Instance.new("TextButton", ScreenGui)
+MiniSpam.Size = UDim2.new(0, 60, 0, 30)
+MiniSpam.Position = UDim2.new(1, -135, 0, 10)
+MiniSpam.Visible = false
+MiniSpam.Text = "SPAM"
+MiniSpam.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MiniSpam.TextColor3 = Color3.new(1, 1, 1)
+MiniSpam.Font = Enum.Font.GothamBold
+Instance.new("UICorner", MiniSpam)
+
+local OpenBtn = Instance.new("TextButton", ScreenGui)
+OpenBtn.Size = UDim2.new(0, 60, 0, 30)
+OpenBtn.Position = UDim2.new(1, -70, 0, 10)
+OpenBtn.Visible = false
+OpenBtn.Text = "OPEN"
+OpenBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+OpenBtn.TextColor3 = Color3.new(1, 1, 1)
+OpenBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", OpenBtn)
+
+-- --- UI ELEMENTS ---
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "FEARED SPAMMER"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 10
+Title.BackgroundTransparency = 1
+
+local Scroll = Instance.new("ScrollingFrame", MainFrame)
+Scroll.Size = UDim2.new(1, -10, 1, -110)
+Scroll.Position = UDim2.new(0, 5, 0, 40)
+Scroll.BackgroundTransparency = 1
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Scroll.ScrollBarThickness = 0
+Instance.new("UIListLayout", Scroll).Padding = UDim.new(0, 5)
+
+local SelectionTag = Instance.new("TextLabel", MainFrame)
+SelectionTag.Size = UDim2.new(1, 0, 0, 20)
+SelectionTag.Position = UDim2.new(0, 0, 1, -65)
+SelectionTag.Text = "SELECTED: NONE"
+SelectionTag.TextColor3 = Color3.new(1, 1, 1)
+SelectionTag.Font = Enum.Font.Gotham
+SelectionTag.TextSize = 8
+SelectionTag.BackgroundTransparency = 1
+
+local MainSpam = Instance.new("TextButton", MainFrame)
+MainSpam.Size = UDim2.new(1, -20, 0, 35)
+MainSpam.Position = UDim2.new(0, 10, 1, -40)
+MainSpam.Text = "EXECUTE (F)"
+MainSpam.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainSpam.TextColor3 = Color3.new(1, 1, 1)
+MainSpam.Font = Enum.Font.GothamBold
+Instance.new("UICorner", MainSpam)
+
+-- --- LOGIC ---
+local function sendChat(m)
+    local s, c = pcall(function() return TextChatService.TextChannels.RBXGeneral end)
+    if s and c then c:SendAsync(m) else
+        local e = ReplicatedStorage:FindFirstChild("SayMessageRequest", true)
+        if e then e:FireServer(m, "All") end
+    end
+end
+
+local function runSpam(target)
+    if not target or target == "NONE" then return end
+    local cmds = {";rocket ", ";balloon ", ";ragdoll ", ";morph ", ";jumpscare "}
+    for _, c in ipairs(cmds) do sendChat(c .. target) task.wait(0.1) end
+end
+
+local function getClosest()
+    local best, dist = nil, math.huge
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local d = (LocalPlayer.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+            if d < dist then best, dist = p, d end
+        end
+    end
+    return best
+end
+
+local function updateList()
+    for _, v in pairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+    for _, p in pairs(Players:GetPlayers()) do
+        local b = Instance.new("TextButton", Scroll)
+        b.Size = UDim2.new(1, 0, 0, 35)
+        b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        b.Text = p.DisplayName
+        b.TextColor3 = Color3.new(1, 1, 1)
+        b.TextXAlignment = Enum.TextXAlignment.Left
+        b.Font = Enum.Font.Gotham
+        b.TextSize = 10
+        Instance.new("UICorner", b)
+
+        -- This padding moves the text further right to prevent headshot overlap
+        local padding = Instance.new("UIPadding", b)
+        padding.PaddingLeft = UDim.new(0, 40) 
+
+        local img = Instance.new("ImageLabel", b)
+        img.Size = UDim2.new(0, 26, 0, 26)
+        img.Position = UDim2.new(0, -34, 0.5, -13) -- Positioned relative to the padded text
+        img.Image = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+        img.BackgroundTransparency = 1
+        Instance.new("UICorner", img).CornerRadius = UDim.new(1, 0)
+
+        b.MouseButton1Click:Connect(function()
+            selectedPlayerName = p.Name
+            SelectionTag.Text = "SELECTED: " .. p.DisplayName:upper()
+            SelectionTag.TextColor3 = Color3.fromRGB(255, 100, 100)
+        end)
+    end
+end
+
+-- --- BUTTON EVENTS ---
+MiniBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    MiniSpam.Visible = true
+    OpenBtn.Visible = true
+end)
+
+OpenBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    MiniSpam.Visible = false
+    OpenBtn.Visible = false
+end)
+
+MainSpam.MouseButton1Click:Connect(function() runSpam(selectedPlayerName) end)
+MiniSpam.MouseButton1Click:Connect(function() local t = getClosest() if t then runSpam(t.Name) end end)
+
+UserInputService.InputBegan:Connect(function(i, g)
+    if not g and i.KeyCode == Enum.KeyCode.F then
+        if MainFrame.Visible then runSpam(selectedPlayerName) 
+        else local t = getClosest() if t then runSpam(t.Name) end end
+    end
+end)
+
+Players.PlayerAdded:Connect(updateList)
+Players.PlayerRemoving:Connect(updateList)
+updateList()
