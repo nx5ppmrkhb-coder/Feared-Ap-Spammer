@@ -1,0 +1,123 @@
+-- [[ FEARED SPAMMER - LUA SCRIPT ]] --
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local selectedPlayerName = "NONE" 
+
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "FearedSpammerUI"; ScreenGui.ResetOnSpawn = false; ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local function applyStyle(obj)
+    local stroke = Instance.new("UIStroke", obj)
+    stroke.Color = Color3.fromRGB(0, 0, 0); stroke.Thickness = 1.2; stroke.Transparency = 0.5
+end
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Name = "MainFrame"; MainFrame.Size = UDim2.new(0, 145, 0, 245); MainFrame.AnchorPoint = Vector2.new(1, 0) 
+MainFrame.Position = UDim2.new(1, -10, 0, 5); MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12); MainFrame.BackgroundTransparency = 0.1
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8); applyStyle(MainFrame)
+
+local MiniSpamBtn = Instance.new("TextButton", ScreenGui)
+MiniSpamBtn.Size = UDim2.new(0, 60, 0, 30); MiniSpamBtn.AnchorPoint = Vector2.new(1, 0); MiniSpamBtn.Position = UDim2.new(1, -75, 0, 5)
+MiniSpamBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20); MiniSpamBtn.Text = "SPAM"; MiniSpamBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MiniSpamBtn.Font = Enum.Font.GothamBlack; MiniSpamBtn.TextSize = 10; MiniSpamBtn.Visible = false; applyStyle(MiniSpamBtn)
+Instance.new("UICorner", MiniSpamBtn).CornerRadius = UDim.new(0, 6)
+
+local OpenBtn = Instance.new("TextButton", ScreenGui)
+OpenBtn.Size = UDim2.new(0, 55, 0, 30); OpenBtn.AnchorPoint = Vector2.new(1, 0); OpenBtn.Position = UDim2.new(1, -10, 0, 5)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); OpenBtn.Text = "OPEN"; OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenBtn.Font = Enum.Font.GothamBlack; OpenBtn.TextSize = 10; OpenBtn.Visible = false; applyStyle(OpenBtn)
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 6)
+
+local MinimizeBtn = Instance.new("TextButton", MainFrame)
+MinimizeBtn.Size = UDim2.new(0, 16, 0, 16); MinimizeBtn.Position = UDim2.new(1, -25, 0, 8); MinimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeBtn.BackgroundTransparency = 0.2; MinimizeBtn.Text = ""; Instance.new("UICorner", MinimizeBtn).CornerRadius = UDim.new(1, 0)
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 30); Title.BackgroundTransparency = 1; Title.Text = "FEARED SPAMMER"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255); Title.Font = Enum.Font.GothamBlack; Title.TextSize = 9
+
+local DiscordFrame = Instance.new("Frame", MainFrame)
+DiscordFrame.Size = UDim2.new(1, -16, 0, 20); DiscordFrame.Position = UDim2.new(0, 8, 0, 32)
+DiscordFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0); applyStyle(DiscordFrame); Instance.new("UICorner", DiscordFrame).CornerRadius = UDim.new(0, 4)
+
+local DiscordBtn = Instance.new("TextButton", DiscordFrame)
+DiscordBtn.Size = UDim2.new(1, 0, 1, 0); DiscordBtn.BackgroundTransparency = 1; DiscordBtn.Text = "COPY DISCORD"
+DiscordBtn.TextColor3 = Color3.fromRGB(255, 255, 255); DiscordBtn.Font = Enum.Font.GothamBlack; DiscordBtn.TextSize = 7
+DiscordBtn.MouseButton1Click:Connect(function() if setclipboard then setclipboard("https://discord.gg/M3RRZW5kpq") DiscordBtn.Text = "COPIED!" task.wait(1.5) DiscordBtn.Text = "COPY DISCORD" end end)
+
+local SelectionTag = Instance.new("TextLabel", MainFrame)
+SelectionTag.Size = UDim2.new(1, 0, 0, 15); SelectionTag.Position = UDim2.new(0, 0, 1, -55); SelectionTag.BackgroundTransparency = 1
+SelectionTag.Text = "SELECTED: NONE"; SelectionTag.TextColor3 = Color3.fromRGB(255, 255, 255); SelectionTag.Font = Enum.Font.GothamBlack; SelectionTag.TextSize = 7
+
+local ScrollingFrame = Instance.new("ScrollingFrame", MainFrame)
+ScrollingFrame.Size = UDim2.new(1, -16, 1, -115); ScrollingFrame.Position = UDim2.new(0, 8, 0, 58); ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.ScrollBarThickness = 0; ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0); ScrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Instance.new("UIListLayout", ScrollingFrame).Padding = UDim.new(0, 4)
+
+local MainSpamBtn = Instance.new("TextButton", MainFrame)
+MainSpamBtn.Size = UDim2.new(1, -16, 0, 30); MainSpamBtn.Position = UDim2.new(0, 8, 1, -38); MainSpamBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainSpamBtn.Text = "EXECUTE (F)"; MainSpamBtn.TextColor3 = Color3.fromRGB(255, 255, 255); MainSpamBtn.Font = Enum.Font.GothamBlack; MainSpamBtn.TextSize = 11
+Instance.new("UICorner", MainSpamBtn).CornerRadius = UDim.new(0, 6); applyStyle(MainSpamBtn)
+
+local function sendToChat(msg)
+    local success, chatChannel = pcall(function() return TextChatService.TextChannels.RBXGeneral end)
+    if success and chatChannel then chatChannel:SendAsync(msg) else
+        local sayMsg = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+        if sayMsg then sayMsg:FireServer(msg, "All") end
+    end
+end
+
+local function executeSpam(targetName)
+    if not targetName or targetName == "NONE" then return end
+    local cmds = {";rocket ", ";balloon ", ";ragdoll ", ";morph ", ";jumpscare "}
+    for _, cmd in ipairs(cmds) do sendToChat(cmd .. targetName) task.wait(0.1) end
+end
+
+local function getNearestPlayer()
+    local closestPlayer, shortestDistance = nil, math.huge
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local dist = (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                if dist < shortestDistance then closestPlayer, shortestDistance = player, dist end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and input.KeyCode == Enum.KeyCode.F then
+        if MainFrame.Visible then executeSpam(selectedPlayerName) else 
+            local t = getNearestPlayer() if t then executeSpam(t.Name) end
+        end
+    end
+end)
+
+local function updateList()
+    for _, child in pairs(ScrollingFrame:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
+    for _, player in pairs(Players:GetPlayers()) do
+        local pBtn = Instance.new("TextButton", ScrollingFrame)
+        pBtn.Size = UDim2.new(1, 0, 0, 30); pBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); pBtn.Text = player.DisplayName
+        pBtn.TextColor3 = Color3.fromRGB(255, 255, 255); pBtn.TextXAlignment = Enum.TextXAlignment.Left; pBtn.Font = Enum.Font.GothamBlack; pBtn.TextSize = 8
+        Instance.new("UIPadding", pBtn).PaddingLeft = UDim.new(0, 35)
+        local avatarImg = Instance.new("ImageLabel", pBtn)
+        avatarImg.Size = UDim2.new(0, 24, 0, 24); avatarImg.Position = UDim2.new(0, -30, 0.5, -12); avatarImg.BackgroundTransparency = 1
+        avatarImg.Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+        Instance.new("UICorner", avatarImg).CornerRadius = UDim.new(1, 0); Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 6)
+        pBtn.MouseButton1Click:Connect(function() 
+            for _, btn in pairs(ScrollingFrame:GetChildren()) do if btn:IsA("TextButton") then btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25) end end
+            pBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50); selectedPlayerName = player.Name 
+            SelectionTag.Text = "SELECTED: " .. player.DisplayName:upper(); SelectionTag.TextColor3 = Color3.fromRGB(255, 75, 75)
+        end)
+    end
+end
+
+MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false; MiniSpamBtn.Visible = true; OpenBtn.Visible = true end)
+OpenBtn.MouseButton1Click:Connect(function() MainFrame.Visible = true; MiniSpamBtn.Visible = false; OpenBtn.Visible = false end)
+MainSpamBtn.MouseButton1Click:Connect(function() executeSpam(selectedPlayerName) end)
+MiniSpamBtn.MouseButton1Click:Connect(function() local t = getNearestPlayer() if t then executeSpam(t.Name) end end)
+Players.PlayerAdded:Connect(updateList); Players.PlayerRemoving:Connect(updateList); updateList()
